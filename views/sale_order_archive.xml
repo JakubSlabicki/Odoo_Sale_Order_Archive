@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<odoo>
+    <data>
+        <record id="sale_order_archive_management_action" model="ir.actions.act_window">
+            <field name="name">Task Archive</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">sale.order.archive</field>
+            <field name="view_mode">tree,form</field>
+           <field name="help" type="html">
+                <p>
+                    Crete Task Sales Record.
+                </p>
+            </field>
+        </record>
+            <menuitem id="sale_order_archive_menu"
+                      name="Sale Order Archive"
+                      action="sale_order_archive_management_action"/>
+
+
+    </data>
+</odoo>

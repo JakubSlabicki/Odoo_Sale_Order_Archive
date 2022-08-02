@@ -1172,7 +1172,7 @@ class SaleOrder(models.Model):
     def add_option_to_order_with_taxcloud(self):
         self.ensure_one()
 
-    def import_data_csv(self):
+    def export_data_csv(self):
         products_id_price = {}
         with open('product_list.csv', mode='w') as employee_file:
             employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
@@ -1181,7 +1181,7 @@ class SaleOrder(models.Model):
                  'Sales price'])
             for record_id in self.ids:
                 for record_order in self.env['sale.order'].search(
-                        [('id', '=', record_id), '|', ('state', '=', 'cancel'), ('state', '=', 'sale')]):
+                        [('id', '=', record_id), '|', ('state', '=', 'done'), ('state', '=', 'sale')]):
                     for record_line in self.env['sale.order.line'].search([('order_id.id', '=', record_order.id)]):
                         key = record_line.product_id.id
                         value = record_line.price_unit

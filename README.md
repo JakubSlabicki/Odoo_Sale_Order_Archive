@@ -65,9 +65,32 @@ When we have model, we can create function which we declare in Scheduler on Odoo
 			self.env['sale.order.archive'].create(each)
 
 
-Now we create a ![Schedule Action](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/task_2.PNG). To do this we go through Web App **Settings/Technical/Automation/Schedule Actions**. After naming action, linking model and setting time period we simple call our function:
+Now we create a Schedule Action:![Schedule Action](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/task_2.PNG). To do this we go through Web App **Settings/Technical/Automation/Schedule Actions**. After naming action, linking model and setting time period we simple call our function:
 
     model.archive_order().
 
 
+## Editing *sale* module
 
+We are editing *sale* module to add exporting functionary. Function task is to create ***product_list.csv* file** that contains main information about product from orders like:
+
+ - Product ID , Barcode , Internal reference
+ - Sales count, mean and sum price
+
+Function counts only products form orders which state is equal to *cancel* or *done* ( `('state', '=', 'done')` or `('state', '=', 'sale')`) and sale checkbox is checked and chosen **Export to .csv** option: ![checked ](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/checkboxed_sales.PNG) 
+
+We are editing one **sale/views** file named [sale_views.xml](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/sale%28edited_files%29/views/sale_views.xml) with simply adding several lines which create option with action called **export_data_csv()** in :
+
+    <record id="model_sale_order_action_export_csv" model="ir.actions.server">
+	    <field name="name">Export to .cvs</field>
+	    <field name="model_id" ref="sale.model_sale_order"/>
+		<field name="binding_model_id" ref="sale.model_sale_order"/>
+		<field name="binding_view_types">form,list</field>
+		<field name="state">code</field>
+		<field name="code">action = records.export_data_csv()</field>
+	</record>
+
+
+Action will be declared in file [sale_order.py](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/sale%28edited_files%29/models/sale_order.py) located in **sale/models** . 
+
+Function that collects checked  **sale.order** ids checks statuses, compare its to **sale.order.line** and **product.product** models to get all necessary data.

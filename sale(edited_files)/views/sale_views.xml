@@ -900,7 +900,7 @@
             <field name="binding_model_id" ref="sale.model_sale_order"/>
             <field name="binding_view_types">form,list</field>
             <field name="state">code</field>
-            <field name="code">action = records.import_data_csv()</field>
+            <field name="code">action = records.export_data_csv()</field>
         </record>
 
         <record id="action_accrued_revenue_entry" model="ir.actions.act_window">

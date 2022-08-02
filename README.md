@@ -72,7 +72,7 @@ Now we create a Schedule Action:![Schedule Action](https://github.com/JakubSlabi
 
 ## Editing *sale* module
 
-We are editing *sale* module to add exporting functionary. Function task is to create ***product_list.csv* file** that contains main information about product from orders like:
+We are editing *sale* module to add exporting functionary. Function task is to create  [example of **product_list**](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/product_list.csv) **file** that contains main information about product from orders like:
 
  - Product ID , Barcode , Internal reference
  - Sales count, mean and sum price
@@ -91,6 +91,62 @@ We are editing one **sale/views** file named [sale_views.xml](https://github.com
 	</record>
 
 
-Action will be declared in file [sale_order.py](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/sale%28edited_files%29/models/sale_order.py) located in **sale/models** . 
+Action will be declared in file [sale_order.py](https://github.com/JakubSlabicki/Odoo_Sale_Order_Archive/blob/main/sale%28edited_files%29/models/sale_order.py) located in **sale/models** . At the end of model *sale.order* we are adding: 
 
-Function that collects checked  **sale.order** ids checks statuses, compare its to **sale.order.line** and **product.product** models to get all necessary data.
+    def export_data_csv(self):
+	    products_id_price = {}
+		with open('product_list.csv', mode='w') as employee_file:
+			employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+			employee_writer.writerow(['Product ID', 'Product Barcode', 'Product internal reference', 'Sales count', 'Average price unit','Sales price'])
+			for record_id in self.ids:
+				for record_order in self.env['sale.order'].search([('id', '=', record_id), '|', ('state', '=', 'done'), ('state', '=', 'sale')]):
+					for record_line in self.env['sale.order.line'].search([('order_id.id', '=', record_order.id)]):
+						key = record_line.product_id.id
+						value = record_line.price_unit
+
+						for _ in range(int(record_line.product_uom_qty)):
+							if key not in products_id_price:
+								products_id_price[key] = []
+							products_id_price[key].append(value)
+			for k, v in products_id_price.items():
+				products_id_price[k] = [len(v), numpy.mean(v), sum(v)]
+			for k, array_v in products_id_price.items():
+				for record_product in self.env['product.product'].search([('id', '=', k)]):
+					employee_writer.writerow([record_product.id,record_product.barcode, record_product.default_code,array_v[0], array_v[1], array_v[2]])
+
+Function that:
+	
+
+ 1. Creates *.csv* file and writes column names
+
+
+
+	    with open('product_list.csv', mode='w') as employee_file: 
+	  		employee_writer = csv.writer(employee_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL) 
+		    employee_writer.writerow(['Product ID', 'Product Barcode', 'Product internal reference', 'Sales count', 'Average price unit','Sales price'])
+
+
+
+ 2. Collects checked  **sale.order** ids checks if statuses are *done* or *sale*
+
+	    for record_id in self.ids:
+		    for record_order in self.env['sale.order'].search([('id', '=', record_id), '|', ('state', '=', 'done'), ('state', '=', 'sale')]):
+		    
+ 3. Compares ids to  **sale.order.line** model to get product ID, calculate mean (using **numpy** lib) and sum of sales.
+
+			    for record_line in self.env['sale.order.line'].search([('order_id.id', '=', record_order.id)]):
+					key = record_line.product_id.id
+					value = record_line.price_unit
+					for _ in range(int(record_line.product_uom_qty)):
+						if key not in products_id_price:
+							products_id_price[key] = []
+						products_id_price[key].append(value)
+			for k, v in products_id_price.items():
+				products_id_price[k] = [len(v), numpy.mean(v), sum(v)]
+ 4. Compares product ID and gets more product info from **product.product** model
+
+	    for k, array_v in products_id_price.items():
+		    for record_product in self.env['product.product'].search([('id', '=', k)]):
+ 5. Saves data to *.csv* file
+
+	    employee_writer.writerow([record_product.id, record_product.barcode, record_product.default_code, array_v[0], array_v[1], array_v[2]])

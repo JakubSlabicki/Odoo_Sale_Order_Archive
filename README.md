@@ -1,4 +1,4 @@
-﻿# Welcome to Go_REST_API!
+﻿# Welcome to Odoo!
 
 Hi! In this project I create simple module in Odoo 15, module to archive sale orders. The goal is to automatically rewrite data from *sale.order* module to archive and delete them from *sale.order* module. 
 
